@@ -23,15 +23,20 @@
 		"yarn": "^4"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.14.1"
+		"@companion-module/base": "~1.14.1",
+		"dotenv": "^17.3.1",
+		"firebase-admin": "^13.4.0",
+		"ws": "^8.19.0"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^2.6.1",
 		"@types/node": "^22.19.3",
+		"@types/ws": "^8.18.1",
 		"eslint": "^9.39.2",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.7",
 		"prettier": "^3.7.4",
+		"request": "^2.88.2",
 		"rimraf": "^6.1.2",
 		"typescript": "~5.9.3",
 		"typescript-eslint": "^8.51.0"
