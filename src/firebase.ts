@@ -1,187 +1,221 @@
-
 import type { ModuleInstance } from './main.js'
-import { WebSocket } from "ws"
+import { WebSocket } from 'ws'
 
-var ptzId = ""
-var recordEnabled = false
-var camTemp = 4000
-var camTint = 0
-var camExposure = 0
-var zoom = 5
-var ptSensitivity = 5
-var isSmartStation = false
-var socket: WebSocket
+let ptzId = ''
+let recordEnabled = false
+let camTemp = 4000
+let camTint = 0
+let camExposure = 0
+let zoom = 5
+let ptSensitivity = 5
+let isSmartStation = false
+let socket: WebSocket
 
-export function startFirebase(self: ModuleInstance, ptzIdParam: string){
-    socket = new WebSocket("wss://sptz-api-1045344931452.us-east4.run.app", {})
-    
-  //  socket = new WebSocket("http://localhost:8080")
-    socket.on("open", () => {
-        socket.send(JSON.stringify({"type": "subscribe", "ptzId": ptzId}))
-        socket.on("message", (message) => {
-            const payload = JSON.parse(message.toString())
-            if(payload.hasOwnProperty("record")){
-                let value = payload.record
-                self.setVariableValues({ "record": value })
-                recordEnabled = value
-                self.isRecording = value
-                self.checkFeedbacks("RecordState")
-            }
-            else if(payload.hasOwnProperty("stream")){
-                const value = payload.stream
-                self.setVariableValues({ "stream": value })
-                self.isStreaming = value
-                self.checkFeedbacks("StreamState")
-            }
-            else if(payload.hasOwnProperty("smart_station")){
-                const value = payload.smart_station
-                isSmartStation = value
-                self.isSmartStation = value
-                self.checkFeedbacks("SmartStationState")
-            }
-            else if(payload.hasOwnProperty("cameraControls")){
-                const controls = payload.cameraControls
-
-                const value = controls.wbAuto
-                const autoTint = controls.tintAuto
-                self.autoTint = autoTint
-                self.autoWhiteBalance = value
-                
-                camTemp = controls.camTemp
-                camTint = controls.camTint
-                zoom = controls.zoom
-                ptSensitivity = controls.ptSensitivity
-                camExposure = controls.camExposure
-                self.isDockConnected = payload.isDockConnected
-                self.setVariableValues({ "autoWB": value, "camTemp": camTemp, "camTint": camTint, "camExp": camExposure, "zoomSensitivity": zoom, "ptSensitivity": ptSensitivity,
-                    "phoneBattery": round1(payload.phoneBattery * 100), "isDockConnected": payload.isDockConnected
-                 })
-                self.checkFeedbacks("AutoWBState", "AutoTintState", "CamTempState", "CamTintState", "CamExpState", "ZoomSensitivityState", "PtSensitivityState", "DockState")
-            }
-        })
-    })
-    ptzId = ptzIdParam?.toString() ?? "0"
+function connect(self: ModuleInstance): void {
+	socket = new WebSocket('wss://sptz-api-1045344931452.us-east4.run.app')
+	socket.on('open', () => {
+		initialize(self)
+	})
+	socket.onclose = () => {
+		setTimeout(() => {
+			connect(self)
+		}, 1000)
+	}
+	return
+}
+export function startFirebase(self: ModuleInstance, ptzIdParam: string): void {
+	connect(self)
+	//socket = new WebSocket("http://localhost:8080")
+	ptzId = ptzIdParam?.toString() ?? '0'
 }
 
-export function toggleRecord(){
-    const nextValue = !recordEnabled
-    recordEnabled = nextValue
-    socket.send(JSON.stringify({"ptzId": ptzId, "value": nextValue, "type": "record"}))
+function initialize(self: ModuleInstance) {
+	socket.send(JSON.stringify({ type: 'subscribe', ptzId: ptzId }))
+	socket.on('message', (message: string) => {
+		const payload = JSON.parse(message.toString())
+		if (payload.hasOwn('record')) {
+			const value = payload.record
+			self.setVariableValues({ record: value })
+			recordEnabled = value
+			self.isRecording = value
+			self.checkFeedbacks('RecordState')
+		} else if (payload.hasOwn('stream')) {
+			const value = payload.stream
+			self.setVariableValues({ stream: value })
+			self.isStreaming = value
+			self.checkFeedbacks('StreamState')
+		} else if (payload.hasOwn('smart_station')) {
+			const value = payload.smart_station
+			isSmartStation = value
+			self.isSmartStation = value
+			self.checkFeedbacks('SmartStationState')
+		} else if (payload.hasOwn('cameraControls')) {
+			const controls = payload.cameraControls
+
+			const value = controls.wbAuto
+			const autoTint = controls.tintAuto
+			self.autoTint = autoTint
+			self.autoWhiteBalance = value
+
+			camTemp = controls.camTemp
+			camTint = controls.camTint
+			zoom = controls.zoom
+			ptSensitivity = controls.ptSensitivity
+			camExposure = controls.camExposure
+			self.isDockConnected = payload.isDockConnected
+			self.setVariableValues({
+				autoWB: value,
+				camTemp: camTemp,
+				camTint: camTint,
+				camExp: camExposure,
+				zoomSensitivity: zoom,
+				ptSensitivity: ptSensitivity,
+				phoneBattery: round1(payload.phoneBattery * 100),
+				isDockConnected: payload.isDockConnected,
+			})
+			self.checkFeedbacks(
+				'AutoWBState',
+				'AutoTintState',
+				'CamTempState',
+				'CamTintState',
+				'CamExpState',
+				'ZoomSensitivityState',
+				'PtSensitivityState',
+				'DockState',
+			)
+		}
+	})
 }
 
-export function toggleStream(self: ModuleInstance){
-    const nextValue = !self.isStreaming
-    self.isStreaming = nextValue // optimistic local update
-    socket.send(JSON.stringify({"ptzId": ptzId, "value": nextValue, "type": "stream"}))
-}
-export function toggleAutoWB(self: ModuleInstance){
-    const nextValue = !self.autoWhiteBalance
-    self.autoWhiteBalance = nextValue // optimistic local update
-    socket.send(JSON.stringify({"ptzId": ptzId, "value": nextValue, "type": "toggleAutoWb"}))
+export function toggleRecord(): void {
+	const nextValue = !recordEnabled
+	recordEnabled = nextValue
+	socket.send(JSON.stringify({ ptzId: ptzId, value: nextValue, type: 'record' }))
 }
 
-export function changeWB(self: ModuleInstance, increment: boolean){
-    if(increment){
-        if(camTemp < 7000){
-            camTemp += 100
-        }
-    }
-    else{
-        if(camTemp > 2700){
-            camTemp -= 100
-        }
-       
-    }
-    socket.send(JSON.stringify({"ptzId": ptzId, "camTint": camTint, "type": "changeWB", "autoWb": self.autoWhiteBalance, "camTemp": camTemp}))
+export function toggleStream(self: ModuleInstance): void {
+	const nextValue = !self.isStreaming
+	self.isStreaming = nextValue // optimistic local update
+	socket.send(JSON.stringify({ ptzId: ptzId, value: nextValue, type: 'stream' }))
+}
+export function toggleAutoWB(self: ModuleInstance): void {
+	const nextValue = !self.autoWhiteBalance
+	self.autoWhiteBalance = nextValue // optimistic local update
+	socket.send(JSON.stringify({ ptzId: ptzId, value: nextValue, type: 'toggleAutoWb' }))
 }
 
-export function changeTint(self: ModuleInstance, increment: boolean){
-    if(increment){
-        if(camTint < 150){
-            camTint += 10
-        }
-    }
-    else{
-        if(camTint > -150){
-            camTint -= 10
-        }
-       
-    }
-    socket.send(JSON.stringify({"ptzId": ptzId, "camTint": camTint, "type": "changeWB", "autoWb": self.autoWhiteBalance, "camTemp": camTemp}))
+export function changeWB(self: ModuleInstance, increment: boolean): void {
+	if (increment) {
+		if (camTemp < 7000) {
+			camTemp += 100
+		}
+	} else {
+		if (camTemp > 2700) {
+			camTemp -= 100
+		}
+	}
+	socket.send(
+		JSON.stringify({
+			ptzId: ptzId,
+			camTint: camTint,
+			type: 'changeWB',
+			autoWb: self.autoWhiteBalance,
+			camTemp: camTemp,
+		}),
+	)
 }
 
-export function setZoom(self: ModuleInstance, type: string){
-    socket.send(JSON.stringify({"ptzId": ptzId, "op": type, "type": "setZoom"}))
-    self.setVariableValues({"zoomState": type})
+export function changeTint(self: ModuleInstance, increment: boolean): void {
+	if (increment) {
+		if (camTint < 150) {
+			camTint += 10
+		}
+	} else {
+		if (camTint > -150) {
+			camTint -= 10
+		}
+	}
+	socket.send(
+		JSON.stringify({
+			ptzId: ptzId,
+			camTint: camTint,
+			type: 'changeWB',
+			autoWb: self.autoWhiteBalance,
+			camTemp: camTemp,
+		}),
+	)
+}
+
+export function setZoom(self: ModuleInstance, type: string): void {
+	socket.send(JSON.stringify({ ptzId: ptzId, op: type, type: 'setZoom' }))
+	self.setVariableValues({ zoomState: type })
 }
 
 function round1(x: number) {
-  return Math.round(x * 10) / 10
+	return Math.round(x * 10) / 10
 }
 
-export function changeExposure(increment: boolean) {
-  const next = increment ? camExposure + 0.1 : camExposure - 0.1
-  camExposure = round1(Math.max(-2, Math.min(2, next)))
-  socket.send(JSON.stringify({"ptzId": ptzId, "camExposure": camExposure, "type": "changeExposure"}))
+export function changeExposure(increment: boolean): void {
+	const next = increment ? camExposure + 0.1 : camExposure - 0.1
+	camExposure = round1(Math.max(-2, Math.min(2, next)))
+	socket.send(JSON.stringify({ ptzId: ptzId, camExposure: camExposure, type: 'changeExposure' }))
 }
 
-export function executePreset(type: string){
-    socket.send(JSON.stringify({"ptzId": ptzId, "preset": type, "type": "executePreset"}))
+export function executePreset(type: string): void {
+	socket.send(JSON.stringify({ ptzId: ptzId, preset: type, type: 'executePreset' }))
 }
 
-export function changeZoomSensitivity(increment: boolean){
-    if(increment){
-        if(zoom < 10){
-            zoom += 1
-        }
-    }
-    else{
-        if(zoom > 1){
-            zoom -= 1
-        }
-    }
-    socket.send(JSON.stringify({"ptzId": ptzId, "zoom": zoom, "type": "changeZoomSensitivity"}))
+export function changeZoomSensitivity(increment: boolean): void {
+	if (increment) {
+		if (zoom < 10) {
+			zoom += 1
+		}
+	} else {
+		if (zoom > 1) {
+			zoom -= 1
+		}
+	}
+	socket.send(JSON.stringify({ ptzId: ptzId, zoom: zoom, type: 'changeZoomSensitivity' }))
 }
 
-export function changePtSensitivity(increment: boolean){
-    if(increment){
-        if(ptSensitivity < 10){
-            ptSensitivity += 1
-        }
-    }
-    else{
-        if(ptSensitivity > 1){
-            ptSensitivity -= 1
-        }
-    }
-    socket.send(JSON.stringify({"ptzId": ptzId, "ptSensitivity": ptSensitivity, "type": "changePtSensitivity"}))
+export function changePtSensitivity(increment: boolean): void {
+	if (increment) {
+		if (ptSensitivity < 10) {
+			ptSensitivity += 1
+		}
+	} else {
+		if (ptSensitivity > 1) {
+			ptSensitivity -= 1
+		}
+	}
+	socket.send(JSON.stringify({ ptzId: ptzId, ptSensitivity: ptSensitivity, type: 'changePtSensitivity' }))
 }
 
-export function changeZoom(increment: boolean){
-    var type = "zoomOut"
-    if(increment){
-        type = "zoomIn"
-    }
-    socket.send(JSON.stringify({"ptzId": ptzId, "op": type, "type": "changeZoom", zoom: zoom / 10}))
+export function changeZoom(increment: boolean): void {
+	let type = 'zoomOut'
+	if (increment) {
+		type = 'zoomIn'
+	}
+	socket.send(JSON.stringify({ ptzId: ptzId, op: type, type: 'changeZoom', zoom: zoom / 10 }))
 }
 
-export function releaseZoom(increment: boolean){
-    var type = "zoomOut"
-    if(increment){
-        type = "zoomIn"
-    }
-    socket.send(JSON.stringify({"ptzId": ptzId, "op": type, "type": "releaseZoom"}))
+export function releaseZoom(increment: boolean): void {
+	let type = 'zoomOut'
+	if (increment) {
+		type = 'zoomIn'
+	}
+	socket.send(JSON.stringify({ ptzId: ptzId, op: type, type: 'releaseZoom' }))
 }
 
-export function moveDock(type: string){
-    socket.send(JSON.stringify({"ptzId": ptzId, "move": type, "type": "moveDock", "ptSensitivity": ptSensitivity / 10}))
+export function moveDock(type: string): void {
+	socket.send(JSON.stringify({ ptzId: ptzId, move: type, type: 'moveDock', ptSensitivity: ptSensitivity / 10 }))
 }
 
-export function releaseDock(type: string){
-    socket.send(JSON.stringify({"ptzId": ptzId, "move": type, "type": "releaseDock"}))
+export function releaseDock(type: string): void {
+	socket.send(JSON.stringify({ ptzId: ptzId, move: type, type: 'releaseDock' }))
 }
 
-export function toggleSmartStation(){
-    isSmartStation = !isSmartStation
-    socket.send(JSON.stringify({"ptzId": ptzId, "value": isSmartStation, "type": "toggleSmartStation"}))
+export function toggleSmartStation(): void {
+	isSmartStation = !isSmartStation
+	socket.send(JSON.stringify({ ptzId: ptzId, value: isSmartStation, type: 'toggleSmartStation' }))
 }
