@@ -11,8 +11,14 @@ let ptSensitivity = 5
 let isSmartStation = false
 let socket: WebSocket
 
+export function startFirebase(self: ModuleInstance, ptzIdParam: string): void {
+	connect(self)
+	ptzId = ptzIdParam?.toString() ?? '0'
+}
+
 function connect(self: ModuleInstance): void {
-	socket = new WebSocket('wss://sptz-api-1045344931452.us-east4.run.app')
+	socket = new WebSocket('wss://api.smartptz.com')
+	//socket = new WebSocket("http://localhost:8080")
 	socket.on('open', () => {
 		initialize(self)
 	})
@@ -21,35 +27,33 @@ function connect(self: ModuleInstance): void {
 			connect(self)
 		}, 1000)
 	}
-	return
-}
-export function startFirebase(self: ModuleInstance, ptzIdParam: string): void {
-	connect(self)
-	//socket = new WebSocket("http://localhost:8080")
-	ptzId = ptzIdParam?.toString() ?? '0'
 }
 
 function initialize(self: ModuleInstance) {
-	socket.send(JSON.stringify({ type: 'subscribe', ptzId: ptzId }))
-	socket.on('message', (message: string) => {
-		const payload = JSON.parse(message.toString())
-		if (payload.hasOwn('record')) {
+	socket.send(JSON.stringify({ ptzId: ptzId, type: 'subscribe' }))
+	socket.on('message', (message) => {
+		let payload: any = {}
+		if (typeof message === 'string') {
+			payload = JSON.parse(message)
+		}
+
+		if (Object.hasOwn(payload, 'record')) {
 			const value = payload.record
 			self.setVariableValues({ record: value })
 			recordEnabled = value
 			self.isRecording = value
 			self.checkFeedbacks('RecordState')
-		} else if (payload.hasOwn('stream')) {
+		} else if (Object.hasOwn(payload, 'stream')) {
 			const value = payload.stream
 			self.setVariableValues({ stream: value })
 			self.isStreaming = value
 			self.checkFeedbacks('StreamState')
-		} else if (payload.hasOwn('smart_station')) {
+		} else if (Object.hasOwn(payload, 'smart_station')) {
 			const value = payload.smart_station
 			isSmartStation = value
 			self.isSmartStation = value
 			self.checkFeedbacks('SmartStationState')
-		} else if (payload.hasOwn('cameraControls')) {
+		} else if (Object.hasOwn(payload, 'cameraControls')) {
 			const controls = payload.cameraControls
 
 			const value = controls.wbAuto

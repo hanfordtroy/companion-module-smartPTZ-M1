@@ -1,4 +1,3 @@
-
 import { combineRgb } from '@companion-module/base'
 import type { ModuleInstance } from './main.js'
 
@@ -11,11 +10,8 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 				bgcolor: combineRgb(255, 0, 0),
 				color: combineRgb(255, 255, 255),
 			},
-			options: [
-				
-			],
+			options: [],
 			callback: () => {
-				
 				if (self.isRecording) {
 					return true
 				} else {
@@ -32,7 +28,6 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			},
 			options: [],
 			callback: () => {
-				
 				if (self.isStreaming) {
 					return true
 				} else {
@@ -81,7 +76,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			type: 'value',
 			options: [],
 			callback: () => {
-				return self.getVariableValue("camTemp") ?? 0
+				return self.getVariableValue('camTemp') ?? 0
 			},
 		},
 		CamTintState: {
@@ -89,7 +84,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			type: 'value',
 			options: [],
 			callback: () => {
-				return self.getVariableValue("camTint") ?? 0
+				return self.getVariableValue('camTint') ?? 0
 			},
 		},
 		CamExpState: {
@@ -97,7 +92,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			type: 'value',
 			options: [],
 			callback: () => {
-				return self.getVariableValue("camExp") ?? 0
+				return self.getVariableValue('camExp') ?? 0
 			},
 		},
 		ZoomSensitivityState: {
@@ -105,7 +100,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			type: 'value',
 			options: [],
 			callback: () => {
-				return self.getVariableValue("zoomSensitivity") ?? 0
+				return self.getVariableValue('zoomSensitivity') ?? 0
 			},
 		},
 		PtSensitivityState: {
@@ -113,7 +108,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			type: 'value',
 			options: [],
 			callback: () => {
-				return self.getVariableValue("ptSensitivity") ?? 0
+				return self.getVariableValue('ptSensitivity') ?? 0
 			},
 		},
 		SmartStationState: {
@@ -131,6 +126,6 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 					return false
 				}
 			},
-		}
+		},
 	})
 }
