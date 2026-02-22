@@ -31,11 +31,8 @@ function connect(self: ModuleInstance): void {
 
 function initialize(self: ModuleInstance) {
 	socket.send(JSON.stringify({ ptzId: ptzId, type: 'subscribe' }))
-	socket.on('message', (message) => {
-		let payload: any = {}
-		if (typeof message === 'string') {
-			payload = JSON.parse(message)
-		}
+	socket.on('message', (message: string) => {
+		const payload = JSON.parse(message)
 
 		if (Object.hasOwn(payload, 'record')) {
 			const value = payload.record
