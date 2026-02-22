@@ -5,8 +5,8 @@
 	"description": "Our bitfocus module",
 	"version": "1.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/hanfordtroy/smartPTZ-BFC-Module-1.git",
-	"bugs": "https://github.com/hanfordtroy/smartPTZ-BFC-Module-1/issues",
+	"repository": "git+https://github.com/hanfordtroy/companion-module-smartptz-remotecontrol",
+	"bugs": "https://github.com/hanfordtroy/companion-module-smartptz-remotecontrol/issues",
 	"maintainers": [
 		{
 			"name": "smartPTZ Team",
