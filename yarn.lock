@@ -3788,6 +3788,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"smartptz-remotecontrol@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "smartptz-remotecontrol@workspace:."
+  dependencies:
+    "@companion-module/base": "npm:~1.14.1"
+    "@companion-module/tools": "npm:^2.6.1"
+    "@types/node": "npm:^22.19.3"
+    "@types/ws": "npm:^8.18.1"
+    dotenv: "npm:^17.3.1"
+    eslint: "npm:^9.39.2"
+    firebase-admin: "npm:^13.4.0"
+    husky: "npm:^9.1.7"
+    lint-staged: "npm:^16.2.7"
+    prettier: "npm:^3.7.4"
+    request: "npm:^2.88.2"
+    rimraf: "npm:^6.1.2"
+    typescript: "npm:~5.9.3"
+    typescript-eslint: "npm:^8.51.0"
+    ws: "npm:^8.19.0"
+  languageName: unknown
+  linkType: soft
+
 "source-map-support@npm:~0.5.20":
   version: 0.5.21
   resolution: "source-map-support@npm:0.5.21"
@@ -4518,28 +4540,6 @@ __metadata:
   checksum: 10c0/36d4793e9cf7060f9da543baf67c55e354f4862c8d3d34de1a1b1d7c382d44171315cc54abf84d8900b8113d742b830108a1434f4898fb244f9b7e8426d4b8f5
   languageName: node
   linkType: hard
-
-"your-module-name@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "your-module-name@workspace:."
-  dependencies:
-    "@companion-module/base": "npm:~1.14.1"
-    "@companion-module/tools": "npm:^2.6.1"
-    "@types/node": "npm:^22.19.3"
-    "@types/ws": "npm:^8.18.1"
-    dotenv: "npm:^17.3.1"
-    eslint: "npm:^9.39.2"
-    firebase-admin: "npm:^13.4.0"
-    husky: "npm:^9.1.7"
-    lint-staged: "npm:^16.2.7"
-    prettier: "npm:^3.7.4"
-    request: "npm:^2.88.2"
-    rimraf: "npm:^6.1.2"
-    typescript: "npm:~5.9.3"
-    typescript-eslint: "npm:^8.51.0"
-    ws: "npm:^8.19.0"
-  languageName: unknown
-  linkType: soft
 
 "zx@npm:^8.8.5":
   version: 8.8.5

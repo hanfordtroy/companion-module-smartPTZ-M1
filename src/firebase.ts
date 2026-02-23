@@ -22,7 +22,10 @@ function connect(self: ModuleInstance): void {
 	socket.on('open', () => {
 		initialize(self)
 	})
-	socket.onclose = () => {
+	socket.onclose = (event) => {
+		if (event.code == 3003) {
+			return
+		}
 		setTimeout(() => {
 			connect(self)
 		}, 1000)
