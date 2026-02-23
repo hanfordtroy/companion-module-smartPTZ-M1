@@ -3,7 +3,7 @@
 	"name": "Smart PTZ Module",
 	"shortname": "smartptz-module",
 	"description": "Our bitfocus module",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/hanfordtroy/companion-module-smartptz-remotecontrol",
 	"bugs": "https://github.com/hanfordtroy/companion-module-smartptz-remotecontrol/issues",
